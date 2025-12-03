@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Would You Eat It?</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #111;
+      color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .panel {
+      display: none;
+      border-radius: 16px;
+      padding: 20px;
+      background: #1e1e1e;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    h1, h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      background: #ffde59;
+      color: #111;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+      background: #ffe57f;
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    #random-image {
+      display: block;
+      width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #333;
+      margin: 10px 0 0;
+      cursor: pointer;
+    }
+
+    .prompt-box {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 12px;
+      background: #252525;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .prompt-box span {
+      opacity: 0.8;
+    }
+
+    .back-btn {
+      margin-top: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      background: #ccc;
+      color: #111;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- MAIN PANEL -->
+    <div id="panel-main" class="panel active">
+      <h1>Would You Eat It?</h1>
+
+      <img id="random-image" src="" alt="Random Food">
+
+      <div class="button-row">
+        <button
+          class="panel-toggle"
+          data-open="panel-would-eat"
+          data-close="panel-main">
+          Would Eat
+        </button>
+
+        <button
+          class="panel-toggle"
+          data-open="panel-would-not-eat"
+          data-close="panel-main">
+          Would Not Eat
+        </button>
+      </div>
+    </div>
+
+    <!-- WOULD EAT PANEL -->
+    <div id="panel-would-eat" class="panel">
+      <h2>Nice choice 😋</h2>
+
+      <div id="prompt-would-eat" class="prompt-box">
+        <span>Click for a random “would eat” prompt</span>
+      </div>
+
+      <button
+        class="panel-toggle back-btn"
+        data-open="panel-main"
+        data-close="panel-would-eat">
+        Back
+      </button>
+    </div>
+
+    <!-- WOULD NOT EAT PANEL -->
+    <div id="panel-would-not-eat" class="panel">
+      <h2>Fair enough 😅</h2>
+
+      <div id="prompt-would-not-eat" class="prompt-box">
+        <span>Click for a random “would not eat” prompt</span>
+      </div>
+
+      <button
+        class="panel-toggle back-btn"
+        data-open="panel-main"
+        data-close="panel-would-not-eat">
+        Back
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // ---------- PANEL TOGGLE (PanelToggle, WouldEatPanel, WouldNotEatPanel) ----------
+    function switchPanels(openIds, closeIds) {
+      openIds.forEach(function (id) {
+        var el = document.getElementById(id.trim());
+        if (el) el.classList.add('active');
+      });
+
+      closeIds.forEach(function (id) {
+        var el = document.getElementById(id.trim());
+        if (el) el.classList.remove('active');
+      });
+    }
+
+    document.querySelectorAll('.panel-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var openAttr = btn.getAttribute('data-open') || '';
+        var closeAttr = btn.getAttribute('data-close') || '';
+
+        var toOpen = openAttr ? openAttr.split(',') : [];
+        var toClose = closeAttr ? closeAttr.split(',') : [];
+
+        switchPanels(toOpen, toClose);
+      });
+    });
+
+    // ---------- RANDOM IMAGE (RandomImageOnCanvas) ----------
+    var randomImageElement = document.getElementById('random-image');
+
+    var imageSources = [
+      'images/image.png',
+      'images/image (1).png',
+      'images/image (2).png',
+      'images/image (3).png',
+      'images/image (4).png',
+      'images/image (5).png'
+      // add more paths here
+    ];
+
+    var lastImageIndex = -1;
+
+    function getRandomIndexDifferentFromLast(length, lastIndex) {
+      if (length === 1) return 0;
+      var index;
+      do {
+        index = Math.floor(Math.random() * length);
+      } while (index === lastIndex);
+      return index;
+    }
+
+    function showRandomImage() {
+      if (!imageSources || imageSources.length === 0) {
+        console.warn('No images set');
+        return;
+      }
+      var idx = getRandomIndexDifferentFromLast(imageSources.length, lastImageIndex);
+      lastImageIndex = idx;
+      randomImageElement.src = imageSources[idx];
+    }
+
+    randomImageElement.addEventListener('click', showRandomImage);
+
+    // ---------- RANDOM PROMPTS (RandomWouldEatPrompt / RandomWouldNotEatPrompt) ----------
+    var promptWouldEatElement = document.getElementById('prompt-would-eat');
+    var promptWouldNotEatElement = document.getElementById('prompt-would-not-eat');
+
+    var promptsWouldEat = [
+      '"Pitch It” Convince the person who’s most disgusted by this picture to take one bite.',
+      '“Best Feature” Pick one thing about this food that’s actually a strength (taste, texture, convenience…). Say it.',
+      '“Add One Thing” You can add just one ingredient to make this more appealing. What is it and why?'
+    ];
+
+    var promptsWouldNotEat = [
+      '“Convince Yourself” Explain why you would eat this if you absolutely had to avoid wasting it (but still stay safe).',
+      '“Rewind Button” If you could go back in time to when this food was bought or cooked, what one decision would you change?',
+      '“Rescue Plan” You still don’t want to eat it yourself. What’s one way to rescue it so it doesn’t go straight to the bin?.'
+    ];
+
+    var lastWouldEatIndex = -1;
+    var lastWouldNotEatIndex = -1;
+
+    function showRandomPrompt(element, prompts, lastIndexRef) {
+      if (!element || !prompts || prompts.length === 0) return;
+
+      var idx = getRandomIndexDifferentFromLast(prompts.length, lastIndexRef.value);
+      lastIndexRef.value = idx;
+      element.innerHTML = '<span>' + prompts[idx] + '</span>';
+    }
+
+    var lastEatRef = { value: -1 };
+    var lastNotEatRef = { value: -1 };
+
+    promptWouldEatElement.addEventListener('click', function () {
+      showRandomPrompt(promptWouldEatElement, promptsWouldEat, lastEatRef);
+    });
+
+    promptWouldNotEatElement.addEventListener('click', function () {
+      showRandomPrompt(promptWouldNotEatElement, promptsWouldNotEat, lastNotEatRef);
+    });
+
+    // ---------- INITIALIZE ----------
+    document.addEventListener('DOMContentLoaded', function () {
+      showRandomImage();
+      showRandomPrompt(promptWouldEatElement, promptsWouldEat, lastEatRef);
+      showRandomPrompt(promptWouldNotEatElement, promptsWouldNotEat, lastNotEatRef);
+    });
+
+    // call immediately as well (if DOM is already loaded)
+    showRandomImage();
+    showRandomPrompt(promptWouldEatElement, promptsWouldEat, lastEatRef);
+    showRandomPrompt(promptWouldNotEatElement, promptsWouldNotEat, lastNotEatRef);
+  </script>
+</body>
+</html>
